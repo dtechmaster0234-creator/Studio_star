@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finanças Criativas • Planejamento Audiovisual</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;display=swap');
+        
+        :root {
+            --gold: #D4AF77;
+        }
+        
+        * {
+            transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+            transition-duration: 150ms;
+        }
+        
+        .tab-active {
+            border-bottom: 4px solid #D4AF77;
+            color: #D4AF77;
+            font-weight: 600;
+        }
+        
+        .card {
+            background: linear-gradient(145deg, #1F1F1F, #2A2A2A);
+            box-shadow: 0 10px 15px -3px rgb(212 175 119);
+        }
+        
+        .table-row:hover {
+            background-color: #333333;
+        }
+        
+        .modal {
+            animation: modalPop 0.3s ease-out;
+        }
+        
+        @keyframes modalPop {
+            0% { transform: scale(0.95); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .main-container {
+            max-width: 1280px;
+            margin-left: auto;
+            margin-right: auto;
+            padding-left: 2rem;
+            padding-right: 2rem;
+        }
+        
+        @media (max-width: 768px) {
+            .main-container {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+            .card {
+                padding: 1.5rem;
+            }
+        }
+        
+        .section-padding {
+            padding-top: 2.5rem;
+            padding-bottom: 2.5rem;
+        }
+    </style>
+</head>
+<body class="bg-[#111111] text-white font-sans">
+    <!-- HEADER -->
+    <header class="bg-[#1F1F1F] border-b border-[#D4AF77]/30 sticky top-0 z-50">
+        <div class="main-container py-6 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <div class="w-9 h-9 bg-gradient-to-br from-[#D4AF77] to-[#E5C68A] rounded-2xl flex items-center justify-center text-2xl flex-shrink-0">
+                    <i class="fa-solid fa-chart-bar"></i>
+                </div>
+                <div>
+                    <h1 class="text-3xl font-semibold tracking-tighter" style="font-family: 'Inter', sans-serif;">
+                        Finanças <span class="text-[#D4AF77]">Criativas</span>
+                    </h1>
+                    <p class="text-sm text-[#D4AF77]/70 -mt-1">Calculadora financeira para videomakers</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-4">
+                <div onclick="exportToCSV()" class="flex items-center gap-2 px-6 py-3 bg-[#D4AF77] hover:bg-[#C19A5F] text-[#111111] rounded-3xl text-sm font-medium cursor-pointer">
+                    <i class="fa-solid fa-download"></i>
+                    <span class="hidden sm:inline">Exportar CSV</span>
+                </div>
+                
+                <div onclick="resetData()" class="w-9 h-9 bg-[#D4AF77] text-[#111111] rounded-2xl flex items-center justify-center font-bold cursor-pointer">
+                    <i class="fa-solid fa-user text-xl"></i>
+                </div>
+            </div>
+        </div>
+        
+        <!-- TABS -->
+        <div class="main-container tab-bar flex border-t border-[#D4AF77]/20 overflow-x-auto">
+            <button onclick="switchTab(0)" id="tab-0" class="tab-active px-8 py-5 text-center font-medium flex items-center gap-2 flex-shrink-0">
+                <i class="fa-solid fa-chart-pie"></i>
+                VISÃO GERAL
+            </button>
+            <button onclick="switchTab(1)" id="tab-1" class="px-8 py-5 text-center font-medium flex items-center gap-2 flex-shrink-0">
+                <i class="fa-solid fa-arrow-trend-up"></i>
+                RECEITAS
+            </button>
+            <button onclick="switchTab(2)" id="tab-2" class="px-8 py-5 text-center font-medium flex items-center gap-2 flex-shrink-0">
+                <i class="fa-solid fa-arrow-trend-down"></i>
+                DESPESAS
+            </button>
+            <button onclick="switchTab(3)" id="tab-3" class="px-8 py-5 text-center font-medium flex items-center gap-2 flex-shrink-0">
+                <i class="fa-solid fa-wallet"></i>
+                FLUXO DE CAIXA
+            </button>
+            <button onclick="switchTab(4)" id="tab-4" class="px-8 py-5 text-center font-medium flex items-center gap-2 flex-shrink-0">
+                <i class="fa-solid fa-calendar-check"></i>
+                PLANEJAMENTO
+            </button>
+            <button onclick="switchTab(5)" id="tab-5" class="px-8 py-5 text-center font-medium flex items-center gap-2 flex-shrink-0">
+                <i class="fa-solid fa-shield-halved"></i>
+                RESERVA
+            </button>
+        </div>
+    </header>
+
+    <div class="main-container py-8 section-padding">
+        
+        <!-- TAB 0: VISÃO GERAL -->
+        <div id="content-0" class="tab-content">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="card rounded-3xl p-8">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-[#D4AF77] text-sm font-medium tracking-widest">RECEITA TOTAL</p>
+                            <h2 id="receita-total" class="text-6xl font-semibold text-white mt-3">R$ 0</h2>
+                        </div>
+                        <i class="fa-solid fa-arrow-trend-up text-5xl text-emerald-400"></i>
+                    </div>
+                </div>
+                
+                <div class="card rounded-3xl p-8">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-[#D4AF77] text-sm font-medium tracking-widest">DESPESAS TOTAIS</p>
+                            <h2 id="despesas-total" class="text-6xl font-semibold text-white mt-3">R$ 0</h2>
+                        </div>
+                        <i class="fa-solid fa-arrow-trend-down text-5xl text-amber-400"></i>
+                    </div>
+                </div>
+                
+                <div class="card rounded-3xl p-8 bg-gradient-to-br from-[#D4AF77] to-[#E5C68A] text-[#111111]">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-[#111111]/80 text-sm font-medium tracking-widest">LUCRO DO MÊS</p>
+                            <h2 id="lucro" class="text-6xl font-semibold text-[#111111] mt-3">R$ 0</h2>
+                        </div>
+                        <i class="fa-solid fa-trophy text-5xl"></i>
+                    </div>
+                    <div class="mt-8 flex items-center gap-3">
+                        <div class="flex-1 h-3 bg-black/20 rounded-full">
+                            <div id="meta-bar" class="h-3 bg-[#111111] rounded-full w-0"></div>
+                        </div>
+                        <p id="meta-percent" class="text-sm font-medium whitespace-nowrap">0% da meta</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-10 grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="card rounded-3xl p-8">
+                    <h3 class="text-lg font-medium mb-6">Indicadores principais</h3>
+                    <div class="space-y-8">
+                        <div class="flex justify-between items-baseline">
+                            <span class="text-sm">Ticket médio por projeto</span>
+                            <span id="ticket-medio" class="font-semibold text-4xl">R$ 0</span>
+                        </div>
+                        <div class="flex justify-between items-baseline">
+                            <span class="text-sm">Projetos fechados</span>
+                            <span id="projetos-fechados" class="font-semibold text-4xl">0</span>
+                        </div>
+                        <div class="flex justify-between items-baseline">
+                            <span class="text-sm">% de despesas de produção</span>
+                            <span id="perc-producao" class="font-semibold text-4xl">0%</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card rounded-3xl p-8 flex flex-col justify-center">
+                    <p class="text-[#D4AF77] text-lg">Comece adicionando suas receitas e despesas nas abas acima.</p>
+                    <p class="text-sm text-gray-400 mt-3">Os cálculos são atualizados em tempo real conforme você insere os dados.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 1: RECEITAS -->
+        <div id="content-1" class="tab-content hidden">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-3xl font-medium">Receitas • Projetos</h2>
+                <button onclick="openAddModal(1)" class="bg-[#D4AF77] hover:bg-[#C19A5F] text-[#111111] px-8 py-4 rounded-3xl flex items-center gap-3 text-lg">
+                    <i class="fa-solid fa-plus"></i>
+                    Novo projeto
+                </button>
+            </div>
+            
+            <div class="card rounded-3xl overflow-hidden">
+                <table class="w-full min-w-full">
+                    <thead class="bg-[#2A2A2A]">
+                        <tr>
+                            <th class="text-left py-6 px-8 font-medium">Data</th>
+                            <th class="text-left py-6 px-8 font-medium">Cliente / Projeto</th>
+                            <th class="text-left py-6 px-8 font-medium">Tipo de serviço</th>
+                            <th class="text-right py-6 px-8 font-medium">Previsto</th>
+                            <th class="text-right py-6 px-8 font-medium">Recebido</th>
+                            <th class="py-6 px-8 font-medium">Status</th>
+                            <th class="w-14"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="receitas-body" class="divide-y divide-[#333333]"></tbody>
+                </table>
+                
+                <div id="receitas-empty" class="hidden p-12 text-center text-gray-400">
+                    Nenhuma receita cadastrada ainda. Clique em “Novo projeto” para começar.
+                </div>
+            </div>
+            
+            <div class="mt-6 text-right">
+                Total recebido este mês: <span id="total-recebido" class="text-4xl font-semibold">R$ 0</span>
+            </div>
+        </div>
+
+        <!-- TAB 2: DESPESAS -->
+        <div id="content-2" class="tab-content hidden">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-3xl font-medium">Despesas • Produção</h2>
+                <button onclick="openAddModal(2)" class="bg-[#D4AF77] hover:bg-[#C19A5F] text-[#111111] px-8 py-4 rounded-3xl flex items-center gap-3 text-lg">
+                    <i class="fa-solid fa-plus"></i>
+                    Nova despesa
+                </button>
+            </div>
+            
+            <div class="card rounded-3xl overflow-hidden">
+                <table class="w-full min-w-full">
+                    <thead class="bg-[#2A2A2A]">
+                        <tr>
+                            <th class="text-left py-6 px-8 font-medium">Data</th>
+                            <th class="text-left py-6 px-8 font-medium">Categoria</th>
+                            <th class="text-left py-6 px-8 font-medium">Descrição</th>
+                            <th class="text-right py-6 px-8 font-medium">Valor</th>
+                            <th class="py-6 px-8 font-medium">Tipo</th>
+                            <th class="py-6 px-8 font-medium">Pessoal / Profissional</th>
+                            <th class="w-14"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="despesas-body" class="divide-y divide-[#333333]"></tbody>
+                </table>
+                
+                <div id="despesas-empty" class="hidden p-12 text-center text-gray-400">
+                    Nenhuma despesa cadastrada ainda. Clique em “Nova despesa” para começar.
+                </div>
+            </div>
+            
+            <div class="mt-6 text-right">
+                Total de despesas este mês: <span id="total-despesas" class="text-4xl font-semibold">R$ 0</span>
+            </div>
+        </div>
+
+        <!-- TAB 3: FLUXO DE CAIXA -->
+        <div id="content-3" class="tab-content hidden">
+            <h2 class="text-3xl font-medium mb-6">Fluxo de Caixa • Mês atual</h2>
+            <div class="card rounded-3xl p-8 grid grid-cols-1 md:grid-cols-2 gap-12">
+                <div>
+                    <h3 class="uppercase text-xs tracking-widest mb-4 text-[#D4AF77]">Entradas</h3>
+                    <div class="flex justify-between text-5xl mb-8">
+                        <div class="font-light">Previsto <span id="entradas-prev" class="text-[#D4AF77]">R$ 0</span></div>
+                        <div class="text-right">Realizado <span id="entradas-real" class="font-semibold text-emerald-400">R$ 0</span></div>
+                    </div>
+                    <div class="h-3 bg-[#2A2A2A] rounded-3xl relative overflow-hidden">
+                        <div id="progress-entrada" class="absolute left-0 top-0 h-3 bg-emerald-400 rounded-3xl" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="uppercase text-xs tracking-widest mb-4 text-[#D4AF77]">Saídas</h3>
+                    <div class="flex justify-between text-5xl mb-8">
+                        <div class="font-light">Previsto <span id="saidas-prev" class="text-[#D4AF77]">R$ 0</span></div>
+                        <div class="text-right">Realizado <span id="saidas-real" class="font-semibold text-amber-400">R$ 0</span></div>
+                    </div>
+                    <div class="h-3 bg-[#2A2A2A] rounded-3xl relative overflow-hidden">
+                        <div id="progress-saida" class="absolute left-0 top-0 h-3 bg-amber-400 rounded-3xl" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+            <div id="saldo-acumulado" class="mt-8 text-center text-4xl font-light text-[#D4AF77]">Saldo acumulado: R$ 0</div>
+        </div>
+
+        <!-- TAB 4: PLANEJAMENTO MENSAL -->
+        <div id="content-4" class="tab-content hidden">
+            <h2 class="text-3xl font-medium mb-6">Planejamento Mensal</h2>
+            <div class="card rounded-3xl p-8">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div>
+                        <label class="block text-xs uppercase tracking-widest mb-2 text-[#D4AF77]">Meta de faturamento</label>
+                        <input id="meta-faturamento" type="text" value="8500" 
+                               oninput="updatePlanejamento()" 
+                               class="w-full text-6xl bg-transparent font-semibold focus:outline-none border-b border-[#D4AF77]/30 focus:border-[#D4AF77]">
+                    </div>
+                    <div>
+                        <label class="block text-xs uppercase tracking-widest mb-2 text-[#D4AF77]">Projetos necessários</label>
+                        <input id="projetos-necessarios" type="text" value="6" 
+                               oninput="updatePlanejamento()" 
+                               class="w-full text-6xl bg-transparent font-semibold focus:outline-none border-b border-[#D4AF77]/30 focus:border-[#D4AF77]">
+                    </div>
+                    <div>
+                        <label class="block text-xs uppercase tracking-widest mb-2 text-[#D4AF77]">Ticket médio desejado</label>
+                        <div id="ticket-desejado" class="text-6xl font-semibold text-[#D4AF77]">R$ 1.417</div>
+                    </div>
+                </div>
+                
+                <div class="mt-12 border-t border-[#333333] pt-8">
+                    <p class="text-sm text-gray-400">Personalize os valores acima conforme sua necessidade. Os cálculos são atualizados automaticamente.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 5: RESERVA FINANCEIRA -->
+        <div id="content-5" class="tab-content hidden">
+            <h2 class="text-3xl font-medium mb-6">Reserva Financeira</h2>
+            <div class="card rounded-3xl p-8 flex flex-col md:flex-row gap-12 items-center">
+                <div class="flex-1">
+                    <div class="text-sm text-[#D4AF77] tracking-widest">VALOR ATUAL GUARDADO</div>
+                    <div id="reserva-atual" class="text-7xl font-semibold mt-3">R$ 0</div>
+                    <div class="text-xs mt-8">Meta sugerida (6 meses de despesas): <span id="meta-reserva" class="font-medium">R$ 0</span></div>
+                    
+                    <div class="mt-8">
+                        <div class="flex justify-between text-xs mb-3"><span>PROGRESSO</span><span id="perc-reserva">0%</span></div>
+                        <div class="h-4 bg-[#2A2A2A] rounded-3xl">
+                            <div id="progress-reserva" class="h-4 bg-gradient-to-r from-[#D4AF77] to-[#E5C68A] rounded-3xl" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex-1 text-center border-t md:border-t-0 md:border-l border-[#333333] pt-8 md:pt-0 md:pl-12">
+                    <p class="text-[#D4AF77]">Você possui <span id="meses-reserva" class="text-6xl font-light">0</span> meses de reserva</p>
+                    <p class="mt-6 text-sm text-gray-400">Adicione receitas e despesas para ver o cálculo em tempo real.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL -->
+    <div onclick="if(event.target.id === 'modal') closeModal()" id="modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-[9999]">
+        <div onclick="event.stopImmediatePropagation()" class="modal bg-[#1F1F1F] rounded-3xl w-full max-w-lg mx-4 p-8">
+            <h3 id="modal-title" class="text-2xl mb-8">Adicionar</h3>
+            <div id="modal-form" class="space-y-6"></div>
+            
+            <div class="flex gap-3 mt-10">
+                <button onclick="closeModal()" class="flex-1 py-5 border border-white/30 rounded-3xl text-lg">Cancelar</button>
+                <button onclick="saveModalItem()" class="flex-1 py-5 bg-[#D4AF77] text-[#111111] rounded-3xl text-lg font-semibold">Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ====================== DADOS ZERADOS ======================
+        let revenues = [];
+        let expenses = [];
+        
+        let currentTab = 0;
+        let modalType = null;
+
+        // ====================== CÁLCULOS GERAIS ======================
+        function updateAllCalculations() {
+            const totalReceived = revenues.reduce((sum, r) => sum + (parseFloat(r.received) || 0), 0);
+            const totalExpenses = expenses.reduce((sum, e) => sum + (parseFloat(e.value) || 0), 0);
+            const lucro = totalReceived - totalExpenses;
+            
+            document.getElementById('receita-total').textContent = `R$ ${totalReceived.toLocaleString('pt-BR')}`;
+            document.getElementById('despesas-total').textContent = `R$ ${totalExpenses.toLocaleString('pt-BR')}`;
+            document.getElementById('lucro').textContent = `R$ ${lucro.toLocaleString('pt-BR')}`;
+            
+            const meta = parseFloat(document.getElementById('meta-faturamento').value) || 8500;
+            const percMeta = totalReceived > 0 ? Math.min(Math.round((totalReceived / meta) * 100), 100) : 0;
+            document.getElementById('meta-bar').style.width = `${percMeta}%`;
+            document.getElementById('meta-percent').textContent = `${percMeta}% da meta`;
+            
+            const avgTicket = revenues.length ? Math.round(totalReceived / revenues.length) : 0;
+            document.getElementById('ticket-medio').textContent = `R$ ${avgTicket}`;
+            document.getElementById('projetos-fechados').textContent = revenues.filter(r => r.status === "Pago").length;
+            
+            const despesasProf = expenses.filter(e => e.personalProf === "Profissional")
+                                        .reduce((sum, e) => sum + (parseFloat(e.value) || 0), 0);
+            const percProducao = totalExpenses ? Math.round((despesasProf / totalExpenses) * 100) : 0;
+            document.getElementById('perc-producao').textContent = `${percProducao}%`;
+            
+            document.getElementById('total-recebido').textContent = `R$ ${totalReceived.toLocaleString('pt-BR')}`;
+            document.getElementById('total-despesas').textContent = `R$ ${totalExpenses.toLocaleString('pt-BR')}`;
+            
+            document.getElementById('entradas-real').textContent = `R$ ${totalReceived.toLocaleString('pt-BR')}`;
+            document.getElementById('saidas-real').textContent = `R$ ${totalExpenses.toLocaleString('pt-BR')}`;
+            document.getElementById('saldo-acumulado').innerHTML = `Saldo acumulado: <span class="font-semibold text-emerald-400">R$ ${lucro.toLocaleString('pt-BR')}</span>`;
+            
+            const reservaAtual = 0;
+            const metaReserva = Math.max(totalExpenses * 6, 10000);
+            const percReserva = reservaAtual > 0 && metaReserva > 0 ? Math.round((reservaAtual / metaReserva) * 100) : 0;
+            document.getElementById('reserva-atual').textContent = `R$ ${reservaAtual.toLocaleString('pt-BR')}`;
+            document.getElementById('meta-reserva').textContent = `R$ ${metaReserva.toLocaleString('pt-BR')}`;
+            document.getElementById('perc-reserva').textContent = `${percReserva}%`;
+            document.getElementById('progress-reserva').style.width = `${percReserva}%`;
+            document.getElementById('meses-reserva').textContent = totalExpenses ? (reservaAtual / totalExpenses).toFixed(1) : '0';
+            
+            updatePlanejamento();
+            
+            document.getElementById('receitas-empty').classList.toggle('hidden', revenues.length > 0);
+            document.getElementById('despesas-empty').classList.toggle('hidden', expenses.length > 0);
+        }
+
+        function updatePlanejamento() {
+            const meta = parseFloat(document.getElementById('meta-faturamento').value) || 0;
+            const projetos = parseFloat(document.getElementById('projetos-necessarios').value) || 1;
+            const ticket = meta / projetos;
+            document.getElementById('ticket-desejado').textContent = `R$ ${Math.round(ticket).toLocaleString('pt-BR')}`;
+        }
+
+        // ====================== RENDERIZAÇÃO ======================
+        function renderReceitas() {
+            const tbody = document.getElementById('receitas-body');
+            tbody.innerHTML = '';
+            revenues.forEach((item, index) => {
+                const tr = document.createElement('tr');
+                tr.className = 'table-row';
+                tr.innerHTML = `
+                    <td class="py-6 px-8">${item.date}</td>
+                    <td class="py-6 px-8">${item.project}</td>
+                    <td class="py-6 px-8">${item.type}</td>
+                    <td class="py-6 px-8 text-right">R$ ${parseFloat(item.predicted).toLocaleString('pt-BR')}</td>
+                    <td class="py-6 px-8 text-right">R$ ${parseFloat(item.received).toLocaleString('pt-BR')}</td>
+                    <td class="py-6 px-8">
+                        <span class="px-4 py-1 text-xs rounded-3xl ${item.status === 'Pago' ? 'bg-emerald-400 text-[#111111]' : item.status === 'Parcelado' ? 'bg-amber-400 text-[#111111]' : 'bg-gray-500 text-white'}">
+                            ${item.status}
+                        </span>
+                    </td>
+                    <td class="px-4">
+                        <button onclick="deleteItem(1, ${index});" class="text-red-400 hover:text-red-300 p-2">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function renderDespesas() {
+            const tbody = document.getElementById('despesas-body');
+            tbody.innerHTML = '';
+            expenses.forEach((item, index) => {
+                const tr = document.createElement('tr');
+                tr.className = 'table-row';
+                tr.innerHTML = `
+                    <td class="py-6 px-8">${item.date}</td>
+                    <td class="py-6 px-8">${item.category}</td>
+                    <td class="py-6 px-8">${item.description}</td>
+                    <td class="py-6 px-8 text-right">R$ ${parseFloat(item.value).toLocaleString('pt-BR')}</td>
+                    <td class="py-6 px-8">
+                        <span class="px-4 py-1 text-xs rounded-3xl ${item.type === 'Fixa' ? 'bg-blue-400' : 'bg-purple-400'} text-white">${item.type}</span>
+                    </td>
+                    <td class="py-6 px-8">${item.personalProf}</td>
+                    <td class="px-4">
+                        <button onclick="deleteItem(2, ${index});" class="text-red-400 hover:text-red-300 p-2">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function deleteItem(type, index) {
+            if (confirm('Deseja realmente excluir este item?')) {
+                if (type === 1) revenues.splice(index, 1);
+                else expenses.splice(index, 1);
+                if (type === 1) renderReceitas();
+                else renderDespesas();
+                updateAllCalculations();
+            }
+        }
+
+        // ====================== MODAL ======================
+        function openAddModal(type) {
+            modalType = type;
+            const modal = document.getElementById('modal');
+            const formContainer = document.getElementById('modal-form');
+            const title = document.getElementById('modal-title');
+            
+            modal.classList.remove('hidden');
+            
+            if (type === 1) {
+                title.textContent = 'Novo projeto';
+                formContainer.innerHTML = `
+                    <div class="space-y-6">
+                        <div>
+                            <label class="block text-xs mb-1">Data</label>
+                            <input id="modal-date" type="date" class="w-full bg-[#2A2A2A] px-5 py-4 rounded-3xl">
+                        </div>
+                        <div>
+                            <label class="block text-xs mb-1">Cliente / Projeto</label>
+                            <input id="modal-project" type="text" placeholder="Ex: Vídeo para marca X" class="w-full bg-[#2A2A2A] px-5 py-4 rounded-3xl">
+                        </div>
+                        <div>
+                            <label class="block text-xs mb-1">Tipo de serviço</label>
+                            <select id="modal-type" class="w-full bg-[#2A2A2A] px-5 py-4 rounded-3xl">
+                                <option>Vídeo Corporativo</option>
+                                <option>Conteúdo para redes</option>
+                                <option>Edição</option>
+                                <option>Drone</option>
+                                <option>Motion Graphics</option>
+                                <option>Gravação</option>
+                            </select>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs mb-1">Valor previsto (R$)</label>
+                                <input id="modal-predicted" type="number" value="0" class="w-full bg-[#2A2A2A] px-5 py-4 rounded-3xl">
+                            </div>
+                            <div>
+                                <label class="block text-xs mb-1">Valor recebido (R$)</label>
+                                <input id="modal-received" type="number" value="0" class="w-full bg-[#2A2A2A] px-5 py-4 rounded-3xl">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs mb-1">Status</label>
+                            <select id="modal-status" class="w-full bg-[#2A2A2A] px-5 py-4 rounded-3xl">
+                                <option>Pendente</option>
+                                <option>Parcelado</option>
+                                <option>Pago</option>
+                            </select>
+                        </div>
+                    </div>
+                `;
+            } else {
+                title.textContent = 'Nova despesa';
+                formContainer.innerHTML = `
+                    <div class="space-y-6">
+                        <div>
+                            <label class="block text-xs mb-1">Data</label>
+                            <input id="modal-date" type="date" class="w-full bg-[#2A2A2A] px-5 py-4 rounded-3xl">
+                        </div>
+                        <div>
+                            <label class="block text-xs mb-1">Categoria</label>
+                            <select id="modal-category" class="w-full bg-[#2A2A2A] px-5 py-4 rounded-3xl">
+                                <option>Equipamentos</option>
+                                <option>Softwares / Assinaturas</option>
+                                <option>Produção</option>
+                                <option>Marketing</option>
+                                <option>Iluminação / Áudio</option>
+                                <option>Despesas Pessoais</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs mb-1">Descrição</label>
+                            <input id="modal-description" type="text" placeholder="Ex: Aluguel de câmera" class="w-full bg-[#2A2A2A] px-5 py-4 rounded-3xl">
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs mb-1">Valor (R$)</label>
+                                <input id="modal-value" type="number" value="0" class="w-full bg-[#2A2A2A] px-5 py-4 rounded-3xl">
+                            </div>
+                            <div>
+                                <label class="block text-xs mb-1">Tipo</label>
+                                <select id="modal-type-exp" class="w-full bg-[#2A2A2A] px-5 py-4 rounded-3xl">
+                                    <option>Fixa</option>
+                                    <option>Variável</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs mb-1">Pessoal ou Profissional</label>
+                            <select id="modal-personal-prof" class="w-full bg-[#2A2A2A] px-5 py-4 rounded-3xl">
+                                <option>Profissional</option>
+                                <option>Pessoal</option>
+                            </select>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function saveModalItem() {
+            const date = document.getElementById('modal-date').value || new Date().toISOString().slice(0,10);
+            
+            if (modalType === 1) {
+                revenues.unshift({
+                    date: date,
+                    project: document.getElementById('modal-project').value || 'Projeto sem nome',
+                    type: document.getElementById('modal-type').value,
+                    predicted: parseFloat(document.getElementById('modal-predicted').value) || 0,
+                    received: parseFloat(document.getElementById('modal-received').value) || 0,
+                    status: document.getElementById('modal-status').value
+                });
+                renderReceitas();
+            } else {
+                expenses.unshift({
+                    date: date,
+                    category: document.getElementById('modal-category').value,
+                    description: document.getElementById('modal-description').value || 'Sem descrição',
+                    value: parseFloat(document.getElementById('modal-value').value) || 0,
+                    type: document.getElementById('modal-type-exp').value,
+                    personalProf: document.getElementById('modal-personal-prof').value
+                });
+                renderDespesas();
+            }
+            
+            closeModal();
+            updateAllCalculations();
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.add('hidden');
+        }
+
+        // ====================== TABS ======================
+        function switchTab(tabIndex) {
+            currentTab = tabIndex;
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`content-${tabIndex}`).classList.remove('hidden');
+            
+            document.querySelectorAll('button[id^="tab-"]').forEach(btn => btn.classList.remove('tab-active'));
+            document.getElementById(`tab-${tabIndex}`).classList.add('tab-active');
+            
+            if (tabIndex === 1) renderReceitas();
+            if (tabIndex === 2) renderDespesas();
+        }
+
+        // ====================== EXPORT & RESET ======================
+        function exportToCSV() {
+            let csv = "Tipo,Data,Descrição,Valor\n";
+            revenues.forEach(r => csv += `Receita,${r.date},${r.project},${r.received}\n`);
+            expenses.forEach(e => csv += `Despesa,${e.date},${e.description},${e.value}\n`);
+            
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `financas-criativas-${new Date().toISOString().slice(0,7)}.csv`;
+            link.click();
+        }
+
+        function resetData() {
+            if (confirm('Deseja limpar todos os dados e começar do zero?')) {
+                revenues = [];
+                expenses = [];
+                document.getElementById('meta-faturamento').value = 8500;
+                document.getElementById('projetos-necessarios').value = 6;
+                renderReceitas();
+                renderDespesas();
+                updateAllCalculations();
+            }
+        }
+
+        // ====================== INICIALIZAÇÃO ======================
+        window.onload = function() {
+            renderReceitas();
+            renderDespesas();
+            updateAllCalculations();
+            console.log('%c✅ Versão Preto / Cinza / Dourado carregada com sucesso!', 'color:#D4AF77; font-weight:600');
+        };
+    </script>
+</body>
+</html>
