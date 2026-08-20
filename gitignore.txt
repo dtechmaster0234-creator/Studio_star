@@ -1,0 +1,27 @@
+# Sistema operacional
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editores
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Node (caso use no futuro)
+node_modules/
+npm-debug.log*
+yarn-error.log*
+
+# Arquivos temporários e cache
+*.log
+*.tmp
+*.temp
+.cache/
+dist/
+build/
+
+# Arquivos de ambiente (se tiver)
+.env
+.env.local
